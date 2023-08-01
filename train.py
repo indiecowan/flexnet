@@ -35,7 +35,7 @@ def train(prob_type: Prob_Type,
             loss = criterion(Yhat, Y)
             if math.isnan(loss.item()):
                 print("Loss is NaN.")
-                break
+                return
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
@@ -44,5 +44,5 @@ def train(prob_type: Prob_Type,
             print("Epoch ", epoch, "Loss ", total_loss / len(dataloader))
         if epoch % 1000 == 0:
             print(str(epoch)+ " " + "epochs done!") # visualze results after every 1000 epochs
-        print("Epoch ", epoch, "Loss ", total_loss / len(dataloader))
+    print("Epoch ", epoch, "Loss ", total_loss / len(dataloader))
 
