@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import model as m
 import math
 from torch.utils.data import DataLoader
-import data.pd_1.pd1_dataset as ds # change to universal dataset later
+import data.num_ds as ds # change to universal dataset later
 
 # ex:
 # --prob_type c --num_in 10 --num_class 3 --csv_path boogies.csv
@@ -14,7 +14,7 @@ import data.pd_1.pd1_dataset as ds # change to universal dataset later
 def parse_args(main):
     def _wrapper():
         parser = argparse.ArgumentParser(description='Process some integers.')
-        parser.add_argument('--prob_type', type=str, help='b (binary classification), c (classification), or r (regression)', required=True)
+        parser.add_argument('--prob_type', choices=['b', 'c', 'r'], type=str, help='b (binary classification), c (classification), or r (regression)', required=True)
         parser.add_argument('--num_in', type=int, help='number of input features', required=True)
 
         # SAVING NUM CLASS AS NUM OUT
@@ -39,7 +39,12 @@ def parse_args(main):
 def main(args):
     print(args)
     print("Welcome to flexnet!")
-    print(f"You've indicated that you want to solve a {args.prob_type} problem.")
+    if args.prob_type == 'b':
+        print("You've indicated that you want to solve a binary classification problem.")
+    elif args.prob_type == 'c':
+        print("You've indicated that you want to solve a multi-class classification problem.")
+    elif args.prob_type == 'r':
+        print("You've indicated that you want to solve a regression problem.")
     print(f"You have {args.num_in} input features.")
     if args.prob_type == 'c':
         print(f"You've indicated that you have {args.num_out} output classes.")
