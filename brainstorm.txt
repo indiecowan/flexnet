@@ -1,0 +1,8 @@
+okay so this wont be as simple as i thought. i wanted to map from x to y but it turns out that case isnt even so popular. here are the dials to eventually take as arguements:
+- problem type: classification, binary classification, 
+- num in, num out
+
+fixed:
+- must be supervised
+- must be all numbers to use universal dataset (auto-tokenizing or something is wack)
+- 1d data and not spacial data

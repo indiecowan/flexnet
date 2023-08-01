@@ -2,46 +2,47 @@ import torch.nn as nn
 import torch
 import matplotlib.pyplot as plt
 import model as m
+import math
+from torch.utils.data import DataLoader
+import data.pd_1.pd1_dataset as ds # change to universal dataset later
 
-# generate synthetic the data
-X = torch.arange(-30, 30, 1).view(-1, 1).type(torch.FloatTensor)
-Y = torch.zeros(X.shape[0])
-Y[(X[:, 0] <= -10)] = 1.0
-Y[(X[:, 0] > -10) & (X[:, 0] < 10)] = 0.5
-Y[(X[:, 0] > 10)] = 0
-print(X)
-print(Y)
+# make dataset object
+dataset = ds.pd1_dataset('data/pd_1/patient_data.csv')
+# print an item in the dataset
+print(dataset[0])
 
-# run model with data
-model = m.flexnet(1, 10, 3, 1)
-Yhat = model(X)
-Y = Y.view(-1, 1)
+# create DataLoader with your dataset and desired batch size
+batch_size = 64
+dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-# find loss
-criterion = nn.MSELoss()
-loss = criterion(Yhat, Y)
-print("loss ", + loss.item())
+# Define the model
+model = m.flexnet(22, 10, 3, 3)  # assume 22 inputs, 10 hidden units, 3 linear layers, 3 output classes
 
-# train
+# Define the loss
+criterion = nn.CrossEntropyLoss()  # use CrossEntropyLoss for multi-class classification
+
+# Define the optimizer
 optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+
 # Define the training loop
 epochs=5000
 cost = []
-total=0
+
 for epoch in range(epochs):
-    total=0
-    epoch = epoch + 1
-    for x, y in zip(X, Y):
-        yhat = model(x.unsqueeze(0))
-        loss = criterion(yhat, y.unsqueeze(0))
+    total_loss = 0
+    for X, Y in dataloader:
+        Yhat = model(X)
+        loss = criterion(Yhat, Y)
+        if math.isnan(loss.item()):
+            print("Loss is NaN.")
+            break
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        # get total loss 
-        total+=loss.item() 
+        total_loss += loss.item() 
     if epoch % 500 == 0:
-        print("Epoch ", epoch, "Loss ", total / X.shape[0])
-    cost.append(total)
+        print("Epoch ", epoch, "Loss ", total_loss / len(dataloader))
+    cost.append(total_loss)
     if epoch % 1000 == 0:
         print(str(epoch)+ " " + "epochs done!") # visualze results after every 1000 epochs   
         # plot the result of function approximator

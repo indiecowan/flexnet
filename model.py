@@ -9,24 +9,30 @@ from collections import OrderedDict
 # Define the class for single layer NN
 class flexnet(torch.nn.Module):    
     # Constructor
-    def __init__(self, input_size, hidden_dim, num_linear_layers, output_size):
+    def __init__(self, input_size, num_linear_layers, output_size, hidden_dim=10):
         super(flexnet, self).__init__()
 
         # use ordered dict to store layers for use of sequential initlization
         layers_od = OrderedDict()
 
         # add linear layers
-        layers_od['linear_1'] = nn.Linear(input_size, hidden_dim)
-        layers_od['relu_1'] = nn.ReLU()
+        if num_linear_layers == 0:
+            layers_od['linear_1'] = nn.Linear(input_size, output_size)
+            self.layers = nn.Sequential(layers_od)
+        
+        else:
+            layers_od['linear_1'] = nn.Linear(input_size, hidden_dim)
+            layers_od['relu_1'] = nn.ReLU()
 
-        for i in range(num_linear_layers - 1):
-            layers_od['linear_' + str(i + 2)] = nn.Linear(hidden_dim, hidden_dim)
-            layers_od['relu_' + str(i + 2)] = nn.ReLU()
-    
-        layers_od['linear_' + str(num_linear_layers + 1)] = nn.Linear(hidden_dim, output_size)
+            # hidden layers
+            for i in range(num_linear_layers - 2):
+                layers_od['linear_' + str(i + 2)] = nn.Linear(hidden_dim, hidden_dim)
+                layers_od['relu_' + str(i + 2)] = nn.ReLU()
+        
+            layers_od['linear_' + str(num_linear_layers + 1)] = nn.Linear(hidden_dim, output_size)
 
-        # add layers to sequential
-        self.layers = nn.Sequential(layers_od)
+            # add layers to sequential
+            self.layers = nn.Sequential(layers_od)
 
 
     # prediction function
