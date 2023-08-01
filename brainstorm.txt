@@ -1,8 +1,14 @@
+task: create a program that gives anyone with a viable csv and problem access to a neural net. just give the csv and some details about the problem / data, and the program will design a model fit for your problem. then, it will demo the model for you at the end. eventually, it will also spit out a folder containing the program to run to start up your model again, and the saved model to load into the program.
+
+08/01/23
 okay so this wont be as simple as i thought. i wanted to map from x to y but it turns out that case isnt even so popular. here are the dials to eventually take as arguements:
-- problem type: classification, binary classification, 
-- num in, num out
+- problem type: binary classification (sigmoid output activation, binary cross entropy loss),classification (softmax output activation, cross entropy loss), or regression (identity output activation, MSE loss)
+- num in (using this to decide where in csv labels start too) (may be able to just get this num from csv we will see)
+- num out is 1 UNLESS classification then you will give num classes
+- path to csv
 
 fixed:
 - must be supervised
-- must be all numbers to use universal dataset (auto-tokenizing or something is wack)
-- 1d data and not spacial data
+- must be all numbers (to use universal dataset) (auto-tokenizing or something is wack)
+- assuming csv is in format X columns, Y columns
+- 1d data and not spacial
