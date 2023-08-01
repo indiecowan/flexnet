@@ -12,7 +12,7 @@ class num_ds(Dataset):
 
     def __getitem__(self, idx):
         row = self.data.iloc[idx]
-        print(row)
+        # print(row)
         # Extract the features and label from the row
         features = torch.tensor(row[:-1].values, dtype=torch.float32) 
         label = row[-1]

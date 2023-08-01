@@ -6,6 +6,7 @@ def convert_to_numerical(old_csv_path, new_csv_path):
     
     # Drop the Patient Id column
     df = df.drop('Patient Id', axis=1)
+    df = df.drop('index', axis=1)
     
     # Convert the Level column to numerical
     # First, let's check what unique values are in the 'Level' column
@@ -22,5 +23,5 @@ def convert_to_numerical(old_csv_path, new_csv_path):
 
 # Use the function
 old_csv_path = 'og_patient_data.csv'
-new_csv_path = 'patient_data.csv.csv'
+new_csv_path = 'patient_data.csv'
 convert_to_numerical(old_csv_path, new_csv_path)

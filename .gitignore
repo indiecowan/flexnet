@@ -2,3 +2,4 @@ env/
 __pycache__/model.cpython-310.pyc
 .DS_Store
 data/__pycache__/num_ds.cpython-310.pyc
+__pycache__/train.cpython-310.pyc

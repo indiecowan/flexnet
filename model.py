@@ -2,6 +2,13 @@ import torch.nn as nn
 import torch
 import matplotlib.pyplot as plt
 from collections import OrderedDict
+from enum import Enum
+
+# model type enum
+class Prob_Type(Enum):
+    B = 1
+    C = 2
+    R = 3
 
 # source env/bin/activate
 # deactivate
@@ -9,11 +16,12 @@ from collections import OrderedDict
 # Define the class for single layer NN
 class flexnet(torch.nn.Module):    
     # Constructor
-    def __init__(self, input_size, num_linear_layers, output_size, hidden_dim=10):
+    def __init__(self, type: Prob_Type, input_size: int, output_size: int, num_linear_layers: int = 1, hidden_dim: int = 10):
         super(flexnet, self).__init__()
 
         # use ordered dict to store layers for use of sequential initlization
         layers_od = OrderedDict()
+
 
         # add linear layers
         if num_linear_layers == 0:
@@ -31,8 +39,13 @@ class flexnet(torch.nn.Module):
         
             layers_od['linear_' + str(num_linear_layers + 1)] = nn.Linear(hidden_dim, output_size)
 
-            # add layers to sequential
-            self.layers = nn.Sequential(layers_od)
+        if type == Prob_Type.B:
+            layers_od['sigmoid'] = nn.Sigmoid()
+        elif type == Prob_Type.C:
+            layers_od['softmax'] = nn.Softmax(dim=1)
+
+        # add layers to sequential
+        self.layers = nn.Sequential(layers_od)
 
 
     # prediction function
