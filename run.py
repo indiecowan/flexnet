@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import model as m
 import math
 from torch.utils.data import DataLoader
-import data.pd_1.pd1_dataset as ds # change to universal dataset later
+import data.num_ds as ds # change to universal dataset later
 
 # make dataset object
-dataset = ds.pd1_dataset('data/pd_1/patient_data.csv')
+dataset = ds.num_ds('data/pd_1/patient_data.csv')
 # print an item in the dataset
 print(dataset[0])
 
