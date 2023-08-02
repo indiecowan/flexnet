@@ -16,7 +16,7 @@ class Prob_Type(Enum):
 # Define the class for single layer NN
 class flexnet(torch.nn.Module):    
     # Constructor
-    def __init__(self, type: Prob_Type, input_size: int, output_size: int, num_linear_layers: int = 1, hidden_dim: int = 10):
+    def __init__(self, type: Prob_Type, input_size: int, output_size: int, num_hidden_layers: int = 1, hidden_dim: int = 10):
         super(flexnet, self).__init__()
 
         # use ordered dict to store layers for use of sequential initlization
@@ -24,7 +24,7 @@ class flexnet(torch.nn.Module):
 
 
         # add linear layers
-        if num_linear_layers == 0:
+        if num_hidden_layers == 0:
             layers_od['linear_1'] = nn.Linear(input_size, output_size)
             self.layers = nn.Sequential(layers_od)
         
@@ -33,11 +33,11 @@ class flexnet(torch.nn.Module):
             layers_od['relu_1'] = nn.ReLU()
 
             # hidden layers
-            for i in range(num_linear_layers - 2):
+            for i in range(num_hidden_layers - 2):
                 layers_od['linear_' + str(i + 2)] = nn.Linear(hidden_dim, hidden_dim)
                 layers_od['relu_' + str(i + 2)] = nn.ReLU()
         
-            layers_od['linear_' + str(num_linear_layers + 1)] = nn.Linear(hidden_dim, output_size)
+            layers_od['linear_' + str(num_hidden_layers + 1)] = nn.Linear(hidden_dim, output_size)
 
         if type == Prob_Type.B:
             layers_od['sigmoid'] = nn.Sigmoid()

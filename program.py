@@ -7,12 +7,15 @@ import model as m
 import math
 from torch.utils.data import DataLoader
 from train import train
+from train import sweep_train
 from model import Prob_Type
 from data.num_ds import num_ds as ds # change to universal dataset later
 from torch.utils.data.dataset import random_split
+import wandb
+import yaml
 
 # ex:
-# python3 program.py --prob_type c --num_in 22 --num_class 3 --csv_path data/pd_1/patient_data.csv
+# python3 program.py --prob_type c --num_in 23 --num_class 3 --csv_path data/pd_1/patient_data.csv
 # use parser to get arguments -problem_type, -num_in, -num_classes (save as num_out, default to 1), -csv_path
 def parse_args(main):
     def _wrapper():
@@ -36,6 +39,8 @@ def parse_args(main):
         main(args)
 
     return _wrapper
+
+
 
 # make main
 @parse_args
@@ -79,9 +84,16 @@ def main(args):
 
 
     # do a train with default values
-    train(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out)
+    # train(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out)
 
     # do a sweep to find optimal hyperparameters
+    with open('sweep_config.yaml', 'r') as file:
+        sweep_config = yaml.safe_load(file)
+    sweep_id = wandb.sweep(sweep_config, project='flexnet')
+
+    # Start the sweep
+    wandb.agent(sweep_id, lambda: sweep_train(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out))
+
 
     # save best model
 

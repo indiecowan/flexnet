@@ -1,0 +1,20 @@
+name: development
+program: program.py
+method: bayes
+metric:
+  goal: minimize
+  name: dev_loss
+parameters:
+  lr:
+    min: 0.0001
+    max: 0.01
+  batch_size:
+    values: [64]
+    # values: [16, 32, 64, 128]
+  hid_layers:
+    min: 0
+    max: 5
+  hid_dim:
+    values: [8, 16, 32, 64, 128, 256]
+  epochs:
+    values: [5000]
