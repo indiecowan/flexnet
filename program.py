@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from train import train
 from model import Prob_Type
 from data.num_ds import num_ds as ds # change to universal dataset later
+from torch.utils.data.dataset import random_split
 
 # ex:
 # --prob_type c --num_in 22 --num_class 3 --csv_path data/pd_1/patient_data.csv
@@ -57,8 +58,15 @@ def main(args):
     print("Loading data...")
     dataset = ds('data/pd_1/patient_data.csv')
 
-    # Define the model
-    print("Initializing model...")
+    # split dataset into train, val, test
+    dataset_size = len(dataset)
+    train_size = int(0.7 * dataset_size)
+    validation_size = int(0.15 * dataset_size)
+    test_size = dataset_size - train_size - validation_size
+
+    train_ds, dev_ds, test_ds = random_split(dataset, [train_size, validation_size, test_size])
+
+    # Define prob type converter
     prob_type_converter = {'b': Prob_Type.B, 'c': Prob_Type.C, 'r': Prob_Type.R}
 
     # Define the loss
@@ -71,7 +79,7 @@ def main(args):
 
 
     # do a train with default values
-    train(prob_type_converter[args.prob_type], dataset, criterion, args.num_in, args.num_out)
+    train(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out)
 
     # do a sweep to find optimal hyperparameters
 
