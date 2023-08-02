@@ -1,5 +1,7 @@
 
 import argparse
+import dis
+from sympy import flatten
 import torch.nn as nn
 import torch
 import matplotlib.pyplot as plt
@@ -8,6 +10,7 @@ import math
 from torch.utils.data import DataLoader
 from train import train
 from train import sweep_train
+from train import get_best_model
 from model import Prob_Type
 from data.num_ds import num_ds as ds # change to universal dataset later
 from torch.utils.data.dataset import random_split
@@ -94,10 +97,29 @@ def main(args):
     # Start the sweep
     wandb.agent(sweep_id, lambda: sweep_train(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out))
 
-
     # save best model
+    best_model = get_best_model()
+    torch.save(best_model.state_dict(), 'best_model.pt')
 
     # loop to demo final model
+    best_model.eval()
+    dev_loss = 0
+    # hardcoded batch size, dont think it matters
+    dev_dl = DataLoader(dev_ds, batch_size=1, shuffle=True)
+
+    display_count = 0
+    with torch.no_grad():
+        for X, Y in dev_dl:
+            print("Sample " + display_count + ":")
+            Yhat = best_model(X)
+            loss = criterion(Yhat, Y)
+            dev_loss += loss.item()
+            print("    X: ", X.flatten())
+            print("    Y: ", Y.flatten())
+            print("    Yhat: ", Yhat.flatten())
+            if display_count < 5:
+                break
+            display_count += 1
 
 
 main()

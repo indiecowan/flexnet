@@ -12,3 +12,5 @@ fixed:
 - must be all numbers (to use universal dataset) (auto-tokenizing or something is wack)
 - assuming csv is in format X columns, Y columns
 - 1d data and not spacial
+
+moisture effect on plant traits, plant traits effect on pollinator visitation

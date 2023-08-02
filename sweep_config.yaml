@@ -6,7 +6,7 @@ metric:
   name: dev_loss
 parameters:
   lr:
-    min: 0.0001
+    min: 0.001
     max: 0.01
   batch_size:
     values: [64]
@@ -20,4 +20,4 @@ parameters:
     values: [5000]
 early_terminate:
   type: run_count
-  max_runs: 50
+  max_runs: 5
