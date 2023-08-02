@@ -1,3 +1,4 @@
+from numpy import save
 import torch.nn as nn
 import torch
 import matplotlib.pyplot as plt
@@ -29,6 +30,9 @@ def train(prob_type: Prob_Type,
             epochs = 5000):
     # print an item in the dataset
     # print(dataset[0])
+
+    # log complexity
+    wandb.log({"complexity": (num_hid_layers + 1) * hid_dim})
 
     # define model
     model = m.flexnet(prob_type, num_in, num_out, num_hid_layers, hid_dim)
@@ -104,6 +108,9 @@ def train(prob_type: Prob_Type,
     # pritn final dev loss
     print("    dev loss: ", total_dev_loss / len(dev_dl))
 
+    # if model is best, save it to global best_model
+    save_best_model(model, total_dev_loss / len(dev_dl))
+
     # return the model
     return model, total_dev_loss / len(dev_dl)
 
@@ -120,12 +127,13 @@ def sweep_train(prob_type: Prob_Type,
         # Then call your train function with run.config values:
         model, dev_loss = train(prob_type, train_ds, dev_ds, criterion, num_in, num_out, num_hid_layers=run.config.hid_layers, hid_dim=run.config.hid_dim, batch_size=run.config.batch_size, lr=run.config.lr, epochs=run.config.epochs)
 
-        global best_dev_loss
-        global best_model
+def save_best_model(model, dev_loss):
+    global best_dev_loss
+    global best_model
 
-        if dev_loss < best_dev_loss:
-            best_dev_loss = dev_loss
-            best_model = model
+    if dev_loss < best_dev_loss:
+        best_dev_loss = dev_loss
+        best_model = model
 
 
 

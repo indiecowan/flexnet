@@ -14,6 +14,8 @@ from train import get_best_model
 from model import Prob_Type
 from data.num_ds import num_ds as ds # change to universal dataset later
 from torch.utils.data.dataset import random_split
+import os
+os.environ["WANDB_SILENT"] = "true"
 import wandb
 import yaml
 
@@ -60,10 +62,10 @@ def main(args):
     if args.prob_type == 'c':
         print(f"You've indicated that you have {args.num_out} output classes.")
     print(f"And your data is stored in {args.csv_path}.")
-    print("Let's get started!")
+    print("\nLet's get started!")
 
     # make dataset object
-    print("Loading data...")
+    print("\nLoading data...")
     dataset = ds('data/pd_1/patient_data.csv')
 
     # split dataset into train, val, test
@@ -87,37 +89,74 @@ def main(args):
 
 
     # do a train with default values
-    # train(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out)
+    print("\nDoing initial train with default values...")
+    hyperparameter_defaults = dict(
+        hid_layers = 2,
+        hid_dim = 10,
+        batch_size = 64,
+        lr = 0.01,
+        epochs = 1000
+        )
 
+    wandb.init(config=hyperparameter_defaults, project='flexnet')
+    config = wandb.config
+
+    model, dev_loss = train(prob_type_converter[args.prob_type], 
+                            train_ds, dev_ds, criterion, 
+                            args.num_in, args.num_out, 
+                            num_hid_layers=config.hid_layers, hid_dim=config.hid_dim, 
+                            batch_size=config.batch_size, lr=config.lr, epochs=config.epochs)
+    
+    print("\nInitial train complete!")
+    print("Dev loss: ", dev_loss)
+    print("\nModel Demo: ")
+    demo_model(model, criterion, test_ds)
+
+    print("\nAre you okay with this model or would you like to sweep for better performance?")
+    answer = input("Enter y to sweep or n to finish (y/n): ")
+
+    if answer.lower() == 'y':
+        print("\nOkay, let's sweep!")
+        print("This may take a while... starting sweep.")
+        sweep_for_best_model(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out)
+
+    print("\nThanks for using flexnet! Here's a peak at the performance of your final model:")
+    # save best model to file
+    best_model = get_best_model()
+    torch.save(best_model.state_dict(), 'best_model.pt')
+
+    # loop to demo final model
+    print("\nFinal model demo: ")
+    demo_model(best_model, criterion, test_ds)
+
+    print("\nGoodbye!")
+
+def sweep_for_best_model(prob_type: Prob_Type, train_ds, dev_ds, criterion, num_in, num_out):
     # do a sweep to find optimal hyperparameters
     with open('sweep_config.yaml', 'r') as file:
         sweep_config = yaml.safe_load(file)
     sweep_id = wandb.sweep(sweep_config, project='flexnet')
 
     # Start the sweep
-    wandb.agent(sweep_id, lambda: sweep_train(prob_type_converter[args.prob_type], train_ds, dev_ds, criterion, args.num_in, args.num_out))
+    wandb.agent(sweep_id, lambda: sweep_train(prob_type, train_ds, dev_ds, criterion, num_in, num_out), count=5)
 
-    # save best model
-    best_model = get_best_model()
-    torch.save(best_model.state_dict(), 'best_model.pt')
-
-    # loop to demo final model
-    best_model.eval()
+def demo_model(model, criterion, ds):
+    model.eval()
     dev_loss = 0
     # hardcoded batch size, dont think it matters
-    dev_dl = DataLoader(dev_ds, batch_size=1, shuffle=True)
+    dl = DataLoader(ds, batch_size=1, shuffle=True)
 
     display_count = 0
     with torch.no_grad():
-        for X, Y in dev_dl:
-            print("Sample " + display_count + ":")
-            Yhat = best_model(X)
+        for X, Y in dl:
+            print("Sample", display_count, ":")
+            Yhat = model(X)
             loss = criterion(Yhat, Y)
             dev_loss += loss.item()
             print("    X: ", X.flatten())
             print("    Y: ", Y.flatten())
             print("    Yhat: ", Yhat.flatten())
-            if display_count < 5:
+            if display_count > 5:
                 break
             display_count += 1
 

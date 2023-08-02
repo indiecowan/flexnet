@@ -1,6 +1,6 @@
 name: development
 program: program.py
-method: bayes
+method: random
 metric:
   goal: minimize
   name: dev_loss
@@ -17,7 +17,5 @@ parameters:
   hid_dim:
     values: [8, 16, 32, 64, 128, 256]
   epochs:
-    values: [5000]
-early_terminate:
-  type: run_count
-  max_runs: 5
+    values: [100]
+max_runs: 5
