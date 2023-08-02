@@ -12,7 +12,7 @@ from data.num_ds import num_ds as ds # change to universal dataset later
 from torch.utils.data.dataset import random_split
 
 # ex:
-# --prob_type c --num_in 22 --num_class 3 --csv_path data/pd_1/patient_data.csv
+# python3 program.py --prob_type c --num_in 22 --num_class 3 --csv_path data/pd_1/patient_data.csv
 # use parser to get arguments -problem_type, -num_in, -num_classes (save as num_out, default to 1), -csv_path
 def parse_args(main):
     def _wrapper():
